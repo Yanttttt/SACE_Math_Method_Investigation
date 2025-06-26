@@ -15,7 +15,7 @@ trans = {
     }
 A=trans["flip"]
 b = np.array([44, 0])
-b2 = np.array([22, 177/80])
+b2 = np.array([22, -623/80])
 
 x_vals = np.linspace(1,5.5, 500)
 f_vals = f(x_vals)
@@ -62,5 +62,27 @@ plt.grid(True)
 plt.tight_layout()
 plt.savefig("transformation_combo.png", dpi=300)
 
-#------------------Non-linear transformation------------------
+def non_linear(points):
+    x = points[0]
+    y = points[1]
+    angle = np.pi * x / 18 - np.pi / 2
+    x_new = -y * np.cos(angle)
+    y_new = -y * np.sin(angle)
+    return np.vstack((x_new, y_new))
 
+nl_points = non_linear(points)
+nl_points2 = non_linear(points2)
+nl_points_covariant = non_linear(points_covariant)
+nl_points2_covariant = non_linear(points2_covariant)
+
+plt.figure(figsize=(6, 6))
+plt.plot(nl_points[0], nl_points[1], label="Nonlinear P(t)", color='blue')
+plt.plot(nl_points2[0], nl_points2[1], color='blue')
+plt.plot(nl_points_covariant[0], nl_points_covariant[1], label="Nonlinear T(P(t))", color='green')
+plt.plot(nl_points2_covariant[0], nl_points2_covariant[1], color='green')
+
+plt.axis('equal')
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.savefig("nonlinear_transform.png", dpi=300)
