@@ -65,7 +65,7 @@ plt.savefig("transformation_combo.png", dpi=300)
 def non_linear(points):
     x = points[0]
     y = points[1]
-    angle = np.pi * x / 18 - np.pi / 2
+    angle = np.pi * x / 36 - np.pi / 2
     x_new = -y * np.cos(angle)
     y_new = -y * np.sin(angle)
     return np.vstack((x_new, y_new))
@@ -76,10 +76,20 @@ nl_points_covariant = non_linear(points_covariant)
 nl_points2_covariant = non_linear(points2_covariant)
 
 plt.figure(figsize=(6, 6))
-plt.plot(nl_points[0], nl_points[1], label="Nonlinear P(t)", color='blue')
+plt.plot(nl_points[0], nl_points[1], color='blue')
 plt.plot(nl_points2[0], nl_points2[1], color='blue')
-plt.plot(nl_points_covariant[0], nl_points_covariant[1], label="Nonlinear T(P(t))", color='green')
+plt.plot(nl_points_covariant[0], nl_points_covariant[1], color='green')
 plt.plot(nl_points2_covariant[0], nl_points2_covariant[1], color='green')
+
+nl_points = trans["rot"] @ nl_points
+nl_points2 = trans["rot"] @ nl_points2
+nl_points_covariant = trans["rot"] @ nl_points_covariant
+nl_points2_covariant = trans["rot"] @ nl_points2_covariant
+
+plt.plot(nl_points[0], nl_points[1], color='purple')
+plt.plot(nl_points2[0], nl_points2[1], color='purple')
+plt.plot(nl_points_covariant[0], nl_points_covariant[1], color='yellow')
+plt.plot(nl_points2_covariant[0], nl_points2_covariant[1], color='yellow')
 
 plt.axis('equal')
 plt.legend()
