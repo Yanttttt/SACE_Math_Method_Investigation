@@ -17,12 +17,32 @@ points2 = np.vstack((x_vals, f2_vals))
 plt.plot(points1[0], points1[1], label=r"$f_1(x)$", color='blue')
 plt.plot(points2[0], points2[1], label=r"$f_2(x)$", color='green')
 plt.fill_between(x_vals, f1_vals, f2_vals, where=f1_vals >= f2_vals, color='red', alpha=0.3, label=r"$D_0$")
+
+# n_rects = 50
+# x_left = np.linspace(1, 5.5, n_rects+1)[:-1]
+# dx = (5.5 - 1) / n_rects
+# for x in x_left:
+#     top_height = f1(x)
+#     bottom_height = f2(x)
+#     rect_height = top_height - bottom_height
+#     plt.gca().add_patch(plt.Rectangle((x, bottom_height), dx, rect_height, facecolor='orange', edgecolor='black'))
+
+# n_rects = 50
+# x_left = np.linspace(1, 5.5, n_rects+1)[:-1]
+# dx = (5.5 - 1) / n_rects
+# for x in x_left:
+#     top_height = f1(x)-f2(x)
+#     bottom_height = 0
+#     rect_height = top_height - bottom_height
+#     plt.gca().add_patch(plt.Rectangle((x, bottom_height), dx, rect_height, facecolor='orange', edgecolor='black'))
+
 plt.axhline(0, color='gray', linewidth=0.5)
 plt.axvline(0, color='gray', linewidth=0.5)
 plt.xlabel("x")
 plt.ylabel("y")
-plt.axis('equal')
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
-plt.savefig("original.png", dpi=300)
+plt.savefig("original.png", dpi=300, bbox_inches='tight')
+
+
