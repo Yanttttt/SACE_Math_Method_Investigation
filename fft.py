@@ -5,11 +5,11 @@ from scipy.fft import fft, ifft
 
 NUM_POINTS = 1024
 
-file= "badapple2.png"
+file= "flower.jpg"
 img = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
 img_inv=img.copy()
-# img_inv = cv2.bitwise_not(img)  # 让黑区域变成白块（用于提取）
-_, binary = cv2.threshold(img_inv, 200, 255, cv2.THRESH_BINARY)
+img_inv = cv2.bitwise_not(img)  # 让黑区域变成白块（用于提取）
+_, binary = cv2.threshold(img_inv, 130, 255, cv2.THRESH_BINARY)
 
 # 提取外轮廓
 contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
