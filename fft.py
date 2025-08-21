@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.fft import fft, ifft 
 
-NUM_POINTS = 1024
+NUM_POINTS = 2500
 
 file= "flower.jpg"
 img = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
@@ -40,7 +40,7 @@ plt.grid(True)
 plt.legend()
 plt.savefig(file+"_contour.png", bbox_inches='tight', pad_inches=0.1)
 
-for FOURIER_KEEP in [2,10, 50, 100, 200, 1000]:
+for FOURIER_KEEP in [2,10, 50, 100, 200, 1000, 2500]:
 
     # -------- 傅里叶变换与压缩 --------
     Z_filtered = np.zeros_like(Z)
