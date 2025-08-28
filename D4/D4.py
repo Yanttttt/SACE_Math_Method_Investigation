@@ -4,7 +4,10 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import lagrange
 
 # === Step 1: 读取灰度图 ===
-img = cv2.imread("M.png", cv2.IMREAD_GRAYSCALE)
+img = cv2.imread("D4\M.png", cv2.IMREAD_GRAYSCALE)
+
+if img is None:
+    raise FileNotFoundError("图片路径不对或文件不存在")
 
 # 二值化（假设封闭图形比背景暗）
 _, binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY_INV)
@@ -35,7 +38,7 @@ y_max = np.array(y_max, dtype=float)
 
 # === Step 4: 拉格朗日插值拟合 ===
 # 为避免高阶插值不稳定，可以只取一部分点
-sample_idx = np.linspace(0, len(x_vals)-1, 15, dtype=int)  # 选15个采样点
+sample_idx = np.linspace(0, len(x_vals)-1, 10, dtype=int)  # 选15个采样点
 x_sample = x_vals[sample_idx]
 
 lagrange_min = lagrange(x_sample, y_min[sample_idx])
