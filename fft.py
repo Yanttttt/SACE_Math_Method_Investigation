@@ -16,7 +16,13 @@ contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
 contour = max(contours, key=cv2.contourArea).squeeze()
 
 # 可视化检查
-
+plt.figure(figsize=(6,3.5))
+plt.plot(contour[:,0], contour[:,1], 'r-', linewidth=0.5)
+plt.gca().set_aspect('equal')
+plt.axis('equal')
+plt.grid(False)
+plt.title("Extracted Contour")
+plt.savefig(file+"_contour_raw.png", bbox_inches='tight', pad_inches=0.1)
 
 # -------- 闭合路径处理 --------
 if not np.array_equal(contour[0], contour[-1]):
@@ -32,7 +38,7 @@ z = contour_sampled[:, 0] + 1j * contour_sampled[:, 1]
 
 Z = fft(z)
 
-plt.figure(figsize=(8, 8))
+plt.figure(figsize=(6, 3.5))
 plt.scatter(np.real(z), -np.imag(z), color='black', s=0.2, label="Sampled Points")
 plt.gca().set_aspect('equal')
 plt.axis('equal')
@@ -49,12 +55,11 @@ for FOURIER_KEEP in [2,10, 50, 100, 200, 1000, 2500]:
 
     z_recon = ifft(Z_filtered)
 
-    plt.figure(figsize=(8, 8))
+    plt.figure(figsize=(4, 4))
     plt.plot(np.real(z_recon), -np.imag(z_recon), color='red')
     plt.gca().set_aspect('equal')
-    plt.xlabel("x")
-    plt.ylabel("y")
     plt.axis('equal')
     plt.grid(True)
     plt.legend()
+    plt.tight_layout()
     plt.savefig(file+"_"+str(FOURIER_KEEP)+".png", bbox_inches='tight', pad_inches=0.1)

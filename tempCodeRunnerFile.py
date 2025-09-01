@@ -1,17 +1,8 @@
-n_rects = 50
-# x_left = np.linspace(1, 5.5, n_rects+1)[:-1]
-# dx = (5.5 - 1) / n_rects
-# for x in x_left:
-#     top_height = f1(x)
-#     bottom_height = f2(x)
-#     rect_height = top_height - bottom_height
-#     plt.gca().add_patch(plt.Rectangle((x, bottom_height), dx, rect_height, facecolor='orange', edgecolor='black'))
-
-# n_rects = 50
-# x_left = np.linspace(1, 5.5, n_rects+1)[:-1]
-# dx = (5.5 - 1) / n_rects
-# for x in x_left:
-#     top_height = f1(x)-f2(x)
-#     bottom_height = 0
-#     rect_height = top_height - bottom_height
-#     plt.gca().add_patch(plt.Rectangle((x, bottom_height), dx, rect_height, facecolor='orange', edgecolor='black'))
+    (1, [(-135.39,171.46), (-83.86,36.14), (3.91,64.40), (-3.74,17.19)]),
+        (2, [(-3.74,17.19), (-13.4,-42.48), (51.12,15.53), (66.82,-6.08)]),
+        (3, [(66.82,-6.08), (79.02,-5.29), (78.62,-14.24)]),
+        (4, [(78.62,-14.24), (72.46,-12.21), (66.52,-14.33)]),
+        (5, [(66.52,-14.33), (30.15,-27.30), (54.53,-38.65), (2.45,-53.06)]),
+        (6, [(2.45,-53.06), (7.57,-63.97), (26.78,-74.38)]),
+        (7, [(26.78,-74.38), (-49.98,-93.38), (-99.30,-63.83)]),
+        (8, [(-99.30,-63.83), (96.95,-1.58), (-205.88,-40.99), (-135.39,171.46)])
