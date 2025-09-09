@@ -145,3 +145,15 @@ plt.legend()
 plt.grid(True)
 plt.tight_layout()
 plt.savefig("./D1/D1.png", dpi=300)
+
+curves = {
+    "P1": P1,
+    "P2": P2,
+    "P3": P3,
+    "P4": P4,
+    "P5": P5,
+    "P6": P6,
+    "P7": P7,
+    "P8": P8
+}
+np.save("D1/curves.npy", curves)
