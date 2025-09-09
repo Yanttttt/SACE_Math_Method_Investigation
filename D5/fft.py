@@ -45,3 +45,8 @@ plt.grid(True)
 plt.legend()
 plt.tight_layout()
 plt.show()
+
+z_points = z_recon
+dz = np.roll(z_points, -1) - z_points  # z_{k+1} - z_k
+area = 0.5 * np.sum(np.imag(np.conj(z_points) * dz))
+print("Area =", area)
