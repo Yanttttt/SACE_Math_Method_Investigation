@@ -5,20 +5,16 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from scipy.fft import fft
 
-# ---------------- user params ----------------
-FILE = "flower.jpg"
 NUM_POINTS = 2000
 FOURIER_LIST = [2, 10, 200, 1000] 
 FRAMES = 800
 INTERVAL_MS = 20
-USE_BLIT = False   # 多子图时一般不要开 blit
+USE_BLIT = False
 OUT_FILE = "D5/epicycles.mp4"
 FPS = 30
 
 # ---------------- load + contour ----------------
 img = cv2.imread(FILE, cv2.IMREAD_GRAYSCALE)
-if img is None:
-    raise FileNotFoundError(f"找不到图像文件: {FILE}")
 
 img_inv = cv2.bitwise_not(img)
 _, binary = cv2.threshold(img_inv, 130, 255, cv2.THRESH_BINARY)
@@ -60,7 +56,7 @@ pad = 0.3
 x_min, x_max = z.real.min(), z.real.max()
 y_min, y_max = z.imag.min(), z.imag.max()
 
-plots_data = []  # 保存每个子图的状态
+plots_data = []
 
 for idx, keep in enumerate(FOURIER_LIST):
     ax = axes[idx]
@@ -84,7 +80,6 @@ for idx, keep in enumerate(FOURIER_LIST):
         "trace": trace
     })
 
-# 如果子图数量不足填充的空格子，隐藏
 for j in range(nplots, len(axes)):
     axes[j].axis("off")
 
@@ -129,6 +124,4 @@ ani = FuncAnimation(
     blit=USE_BLIT, interval=INTERVAL_MS, repeat=True
 )
 
-# 保存为 mp4
 ani.save(OUT_FILE, writer="ffmpeg", fps=FPS)
-print(f"保存完成: {OUT_FILE}")

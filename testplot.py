@@ -1,11 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# t 取值
 t_vals = np.linspace(0, 1, 500)
 
-# 8条曲线的参数方程（之前计算的最简多项式）
-# B1~B8
 def B1(t):
     x = -131.66*t**3 +108.72*t**2 +154.59*t -135.39
     y = -239.05*t**3 +490.74*t**2 -405.96*t +171.46
@@ -48,7 +45,6 @@ def B8(t):
 
 curves = [B1, B2, B3, B4, B5, B6, B7, B8]
 
-# 绘图
 plt.figure(figsize=(4,4))
 colors = plt.cm.tab10(np.arange(8))
 
