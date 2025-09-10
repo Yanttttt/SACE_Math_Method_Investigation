@@ -1,87 +1,134 @@
+# fftanim_multi.py
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 from scipy.fft import fft
-from matplotlib.animation import FuncAnimation, PillowWriter
 
-# -----------------------------
-# 1. 读取图像与轮廓处理
-# -----------------------------
-NUM_POINTS = 5000  # 动画时点数可以小一点，加快速度
-file = "flower.jpg"
-img = cv2.imread(file, cv2.IMREAD_GRAYSCALE)
+# ---------------- user params ----------------
+FILE = "flower.jpg"
+NUM_POINTS = 2000
+FOURIER_LIST = [2, 10, 200, 1000] 
+FRAMES = 800
+INTERVAL_MS = 20
+USE_BLIT = False   # 多子图时一般不要开 blit
+OUT_FILE = "D5/epicycles.mp4"
+FPS = 30
+
+# ---------------- load + contour ----------------
+img = cv2.imread(FILE, cv2.IMREAD_GRAYSCALE)
+if img is None:
+    raise FileNotFoundError(f"找不到图像文件: {FILE}")
+
 img_inv = cv2.bitwise_not(img)
 _, binary = cv2.threshold(img_inv, 130, 255, cv2.THRESH_BINARY)
-
 contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-contour = max(contours, key=cv2.contourArea).squeeze()
 
+contour = max(contours, key=cv2.contourArea).squeeze()
+if contour.ndim == 1 and contour.size == 2:
+    contour = contour[np.newaxis, :]
 if not np.array_equal(contour[0], contour[-1]):
     contour = np.vstack([contour, contour[0]])
 
 indices = np.linspace(0, len(contour) - 1, NUM_POINTS, dtype=int)
 contour_sampled = contour[indices]
 
-# 转复数表示
-z = contour_sampled[:, 0] + 1j * contour_sampled[:, 1]
+z = contour_sampled[:, 0] + 1j * (-contour_sampled[:, 1])
+z = z - z.mean()
+span_x = z.real.max() - z.real.min()
+span_y = z.imag.max() - z.imag.min()
+max_span = max(span_x, span_y)
+scale = 2.0 / max_span if max_span != 0 else 1.0
+z = z * scale
+N = len(z)
 
-# -----------------------------
-# 2. 傅里叶变换
-# -----------------------------
-Z = fft(z) / NUM_POINTS  # 归一化
-N = len(Z)
-freqs = np.fft.fftfreq(N)  # 对应频率
-# 排序，低频到高频
-indices_sorted = np.argsort(np.abs(freqs))
-Z_sorted = Z[indices_sorted]
-freqs_sorted = freqs[indices_sorted]
+Z = fft(z) / N
+all_coeffs = []
+for k, c in enumerate(Z):
+    freq = k if k <= N // 2 else k - N
+    all_coeffs.append((freq, c))
+all_coeffs.sort(key=lambda x: -abs(x[1]))
 
-# -----------------------------
-# 3. 动画设置
-# -----------------------------
-fig, ax = plt.subplots(figsize=(5,5))
-ax.set_aspect('equal')
-ax.set_xlim(np.min(np.real(z))-10, np.max(np.real(z))+10)
-ax.set_ylim(-(np.max(np.imag(z))+10), -(np.min(np.imag(z))-10))
-ax.grid(True)
+# ---------------- figure and subplots ----------------
+nplots = len(FOURIER_LIST)
+cols = 2
+rows = (nplots + 1) // 2
+fig, axes = plt.subplots(rows, cols, figsize=(6*cols, 6*rows))
+axes = axes.flatten()
 
-# 绘制线段和轨迹
-lines = [ax.plot([], [], color='blue')[0] for _ in range(10)]  # 最多10个可见线段
-trace, = ax.plot([], [], color='red')  # 轨迹
-points_x, points_y = [], []
+pad = 0.3
+x_min, x_max = z.real.min(), z.real.max()
+y_min, y_max = z.imag.min(), z.imag.max()
 
-# -----------------------------
-# 4. 动画函数
-# -----------------------------
+plots_data = []  # 保存每个子图的状态
+
+for idx, keep in enumerate(FOURIER_LIST):
+    ax = axes[idx]
+    ax.set_aspect('equal')
+    ax.axis('off')
+    ax.set_xlim(x_min - pad, x_max + pad)
+    ax.set_ylim(y_min - pad, y_max + pad)
+    ax.set_title(f"{keep} terms", fontsize=14)
+
+    coeffs = all_coeffs[:keep]
+    vector_lines = [ax.plot([], [], lw=1, alpha=0.9)[0] for _ in coeffs]
+    trace_line, = ax.plot([], [], lw=1.5)
+    endpoint_dot, = ax.plot([], [], 'o', ms=4)
+    trace = []
+
+    plots_data.append({
+        "coeffs": coeffs,
+        "vector_lines": vector_lines,
+        "trace_line": trace_line,
+        "endpoint_dot": endpoint_dot,
+        "trace": trace
+    })
+
+# 如果子图数量不足填充的空格子，隐藏
+for j in range(nplots, len(axes)):
+    axes[j].axis("off")
+
+# ---------------- animation functions ----------------
+def init():
+    artists = []
+    for pd in plots_data:
+        pd["trace"].clear()
+        for vl in pd["vector_lines"]:
+            vl.set_data([], [])
+        pd["trace_line"].set_data([], [])
+        pd["endpoint_dot"].set_data([], [])
+        artists += [pd["trace_line"], pd["endpoint_dot"]] + pd["vector_lines"]
+    return artists
+
 def update(frame):
-    t = frame / NUM_POINTS * 2 * np.pi  # 0到2π
-    pos = 0+0j
-    positions = [pos]
+    t = (frame % FRAMES) / FRAMES
+    artists = []
+    for pd in plots_data:
+        x, y = 0.0, 0.0
+        for i, (freq, c) in enumerate(pd["coeffs"]):
+            angle = 2 * np.pi * freq * t + np.angle(c)
+            dx = abs(c) * np.cos(angle)
+            dy = abs(c) * np.sin(angle)
+            nx, ny = x + dx, y + dy
+            pd["vector_lines"][i].set_data([x, nx], [y, ny])
+            x, y = nx, ny
 
-    # 依次叠加前10个最大的傅里叶系数
-    for k in range(10):
-        coef = Z_sorted[-(k+1)]
-        freq = freqs_sorted[-(k+1)]
-        pos += coef * np.exp(2j * np.pi * freq * frame)
-        positions.append(pos)
+        pd["trace"].append((x, y))
+        if len(pd["trace"]) > N:
+            pd["trace"].pop(0)
 
-    # 更新线段
-    for i, line in enumerate(lines):
-        if i < len(positions)-1:
-            line.set_data([np.real(positions[i]), np.real(positions[i+1])],
-                          [-np.imag(positions[i]), -np.imag(positions[i+1])])
-        else:
-            line.set_data([], [])
+        tx = [p[0] for p in pd["trace"]]
+        ty = [p[1] for p in pd["trace"]]
+        pd["trace_line"].set_data(tx, ty)
+        pd["endpoint_dot"].set_data([x], [y])
+        artists += [pd["trace_line"], pd["endpoint_dot"]] + pd["vector_lines"]
+    return artists
 
-    # 更新轨迹
-    points_x.append(np.real(positions[-1]))
-    points_y.append(-np.imag(positions[-1]))
-    trace.set_data(points_x, points_y)
-    return lines + [trace]
+ani = FuncAnimation(
+    fig, update, frames=range(FRAMES), init_func=init,
+    blit=USE_BLIT, interval=INTERVAL_MS, repeat=True
+)
 
-# -----------------------------
-# 5. 创建动画
-# -----------------------------
-anim = FuncAnimation(fig, update, frames=NUM_POINTS, interval=20, blit=True)
-anim.save("fourier_epicycles.gif", writer=PillowWriter(fps=30))
-plt.show()
+# 保存为 mp4
+ani.save(OUT_FILE, writer="ffmpeg", fps=FPS)
+print(f"保存完成: {OUT_FILE}")
